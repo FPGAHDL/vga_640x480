@@ -21,11 +21,16 @@
 module vga640x480(
 	input wire dclk,			//pixel clock: 25MHz
 	input wire clr,			//asynchronous reset
+	input wire [2:0] i_red,   //red vga input
+	input wire [2:0] i_green, //green vga input
+	input wire [1:0] i_blue,   //blue vga input
 	output wire hsync,		//horizontal sync out
 	output wire vsync,		//vertical sync out
-	output reg [2:0] red,	//red vga output
-	output reg [2:0] green, //green vga output
-	output reg [1:0] blue	//blue vga output
+	output wire [2:0] red,   //red vga output
+	output wire [2:0] green, //green vga output
+	output wire [1:0] blue,   //blue vga output
+	output wire [9:0] h,	//horizontal line pos
+	output wire [9:0] v //vertica line pos
 	);
 
 // video structure constants
@@ -87,100 +92,13 @@ end
 assign hsync = (hc < hpulse) ? 0:1;
 assign vsync = (vc < vpulse) ? 0:1;
 
-// display 100% saturation colorbars
-// ------------------------
-// Combinational "always block", which is a block that is
-// triggered when anything in the "sensitivity list" changes.
-// The asterisk implies that everything that is capable of triggering the block
-// is automatically included in the sensitivty list.  In this case, it would be
-// equivalent to the following: always @(hc, vc)
-// Assignment statements can only be used on type "reg" and should be of the "blocking" type: =
-always @(*)
-begin
-	// first check if we're within vertical active video range
-	if (vc >= vbp && vc < vfp)
-	begin
-		// now display different colors every 80 pixels
-		// while we're within the active horizontal range
-		// -----------------
-		// display white bar
-		if (hc >= hbp && hc < (hbp+80))
-		begin
-			if(vc >= vbp && vc < (vbp + 240))begin
-				red = 3'b111;
-				green = 3'b111;
-				blue = 2'b11;
-			end
-			else begin
-				red = 3'b000;
-				green = 3'b000;
-				blue = 2'b11;
-			end
-		end
-		// display yellow bar
-		else if (hc >= (hbp+80) && hc < (hbp+160))
-		begin
-			red = 3'b111;
-			green = 3'b111;
-			blue = 2'b00;
-		end
-		// display cyan bar
-		else if (hc >= (hbp+160) && hc < (hbp+240))
-		begin
-			red = 3'b000;
-			green = 3'b111;
-			blue = 2'b11;
-		end
-		// display green bar
-		else if (hc >= (hbp+240) && hc < (hbp+320))
-		begin
-			red = 3'b000;
-			green = 3'b111;
-			blue = 2'b00;
-		end
-		// display magenta bar
-		else if (hc >= (hbp+320) && hc < (hbp+400))
-		begin
-			red = 3'b111;
-			green = 3'b000;
-			blue = 2'b11;
-		end
-		// display red bar
-		else if (hc >= (hbp+400) && hc < (hbp+480))
-		begin
-			red = 3'b111;
-			green = 3'b000;
-			blue = 2'b00;
-		end
-		// display blue bar
-		else if (hc >= (hbp+480) && hc < (hbp+560))
-		begin
-			red = 3'b000;
-			green = 3'b000;
-			blue = 2'b11;
-		end
-		// display black bar
-		else if (hc >= (hbp+560) && hc < (hbp+640))
-		begin
-			red = 3'b000;
-			green = 3'b000;
-			blue = 2'b00;
-		end
-		// we're outside active horizontal range so display black
-		else
-		begin
-			red = 0;
-			green = 0;
-			blue = 0;
-		end
-	end
-	// we're outside active vertical range so display black
-	else
-	begin
-		red = 0;
-		green = 0;
-		blue = 0;
-	end
-end
+wire isValid;
+
+assign h =  ((hc >= hbp) && (hc < hfp)) ? hc-hbp : 0;
+assign v =  ((vc >= vbp) && (vc < vfp)) ? vc-vbp : 0;
+assign isValid = ((vc >= vbp) && (vc < vfp) && (hc >= hbp) && (hc < hfp)) ? 1 : 0;
+assign red = (isValid == 1 ) ? i_red : 0;
+assign green = (isValid == 1 ) ? i_green : 0 ;
+assign blue = (isValid == 1 ) ? i_blue : 0;
 
 endmodule

@@ -40,6 +40,13 @@ wire dclk;
 // disable the 7-segment decimal points
 assign dp = 1;
 
+//internal h v  and r g b signals
+wire [9:0] h;
+wire [9:0] v;
+wire [2:0] r;
+wire [2:0] g;
+wire [1:0] b;
+
 // generate 7-segment clock & display clock
 clockdiv U1(
 	.clk(clk),
@@ -60,11 +67,25 @@ segdisplay U2(
 vga640x480 U3(
 	.dclk(dclk),
 	.clr(clr),
+	.i_red(r),
+	.i_green(g),
+	.i_blue(b),
 	.hsync(hsync),
 	.vsync(vsync),
 	.red(red),
 	.green(green),
-	.blue(blue)
+	.blue(blue),
+	.h(h),
+	.v(v)
 	);
+//Image generator
+image_generator U4(
+    .h(h), 
+    .v(v), 
+    .red(r), 
+    .green(g), 
+    .blue(b)
+    );
+
 
 endmodule
