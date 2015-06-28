@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+		`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -33,24 +33,28 @@ module NERP_demo_top(
 	output wire [7:0] Led
 	);
 
-reg		[28:0] cnt ;
 
-always @(posedge clkin)begin
-	if (clr)begin
-		cnt <= 0;
+
+	reg [23:0] counter;
+   
+   always @(posedge clkin)begin
+      if (clr)begin
+         counter <= 0;
+		end
+		else begin
+		counter <= counter + 1;
+		end
 	end
-	cnt <= cnt + 1;
-end
-
-assign Led[0] = cnt[23];
-assign Led[1] = ~cnt[20];
-assign Led[2] = cnt[20];
-assign Led[3] = ~cnt[20];
-assign Led[4] = cnt[20];
-assign Led[5] = ~cnt[20];
-assign Led[6] = cnt[20];
-assign Led[7] = ~cnt[20];
-
+	
+	
+assign Led[0]=counter[23];
+assign Led[1]=~counter[20];
+assign Led[2]=counter[20];
+assign Led[3]=~counter[20];
+assign Led[4]=counter[20];
+assign Led[5]=~counter[20];
+assign Led[6]=counter[20];
+assign Led[7]=~counter[20];
 
 // 7-segment clock interconnect
 wire segclk;
