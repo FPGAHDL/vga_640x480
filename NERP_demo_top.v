@@ -21,6 +21,7 @@
 module NERP_demo_top(
 	input wire clk,			//master clock = 50MHz
 	input wire clr,			//right-most pushbutton for reset
+	input wire clkin,
 	output wire [6:0] seg,	//7-segment display LEDs
 	output wire [3:0] an,	//7-segment display anode enable
 	output wire dp,			//7-segment display decimal point
@@ -28,8 +29,28 @@ module NERP_demo_top(
 	output wire [2:0] green,//green vga output - 3 bits
 	output wire [1:0] blue,	//blue vga output - 2 bits
 	output wire hsync,		//horizontal sync out
-	output wire vsync			//vertical sync out
+	output wire vsync,			//vertical sync out
+	output wire [7:0] Led
 	);
+
+reg		[28:0] cnt ;
+
+always @(posedge clkin)begin
+	if (clr)begin
+		cnt <= 0;
+	end
+	cnt <= cnt + 1;
+end
+
+assign Led[0] = cnt[23];
+assign Led[1] = ~cnt[20];
+assign Led[2] = cnt[20];
+assign Led[3] = ~cnt[20];
+assign Led[4] = cnt[20];
+assign Led[5] = ~cnt[20];
+assign Led[6] = cnt[20];
+assign Led[7] = ~cnt[20];
+
 
 // 7-segment clock interconnect
 wire segclk;
